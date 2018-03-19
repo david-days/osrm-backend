@@ -81,16 +81,23 @@ Status TablePlugin::HandleRequest(const RoutingAlgorithmsInterface &algorithms,
     }
 
     auto snapped_phantoms = SnapPhantomNodes(phantom_nodes);
-    auto result_table =
-        algorithms.ManyToManySearch(snapped_phantoms, params.sources, params.destinations);
 
-    if (result_table.empty())
+    bool requestDistance = false;
+    if (params.annotations & api::TableParameters::AnnotationsType::Distance)
+    {
+        requestDistance = true;
+    }
+
+    auto result_tables_pair = algorithms.ManyToManySearch(
+        snapped_phantoms, params.sources, params.destinations, requestDistance);
+
+    if (result_tables_pair.first.empty() || (requestDistance && result_tables_pair.first.empty()))
     {
         return Error("NoTable", "No table found", result);
     }
 
     api::TableAPI table_api{facade, params};
-    table_api.MakeResponse(result_table, snapped_phantoms, result);
+    table_api.MakeResponse(result_tables_pair, snapped_phantoms, result);
 
     return Status::Ok;
 }

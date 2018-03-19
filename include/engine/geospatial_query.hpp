@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -26,6 +27,21 @@ inline std::pair<bool, bool> boolPairAnd(const std::pair<bool, bool> &A,
 {
     return std::make_pair(A.first && B.first, A.second && B.second);
 }
+
+// template<class ForwardIt, class T, typename DataFacadeT>
+// T accumulateDistance(ForwardIt first, ForwardIt last, T init, DataFacadeT datafacade)
+// {
+//     if (first != last) {
+//         for (auto current = std::next(first); current != last; ++current)
+//         {
+//             init += util::coordinate_calculation::haversineDistance(
+//                 datafacade.GetCoordinateOfNode(*std::prev(current)),
+//                 datafacade.GetCoordinateOfNode(*current));
+//         }
+//     }
+
+//     return init;
+// }
 
 // Implements complex queries on top of an RTree and builds PhantomNodes from it.
 //
@@ -447,6 +463,8 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
         const auto forward_durations = datafacade.GetUncompressedForwardDurations(geometry_id);
         const auto reverse_durations = datafacade.GetUncompressedReverseDurations(geometry_id);
 
+        const auto forward_geometry = datafacade.GetUncompressedForwardGeometry(geometry_id);
+
         const auto forward_weight_offset =
             std::accumulate(forward_weights.begin(),
                             forward_weights.begin() + data.fwd_segment_position,
@@ -457,11 +475,21 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             forward_durations.begin() + data.fwd_segment_position,
                             EdgeDuration{0});
 
+        EdgeDistance forward_distance_offset = 0;
+        for (auto current = forward_geometry.begin() + 1;
+             current < forward_geometry.begin() + data.fwd_segment_position + 1;
+             ++current)
+        {
+            forward_distance_offset += util::coordinate_calculation::haversineDistance(
+                datafacade.GetCoordinateOfNode(*std::prev(current)),
+                datafacade.GetCoordinateOfNode(*current));
+        }
+
         EdgeWeight forward_weight = forward_weights[data.fwd_segment_position];
         EdgeDuration forward_duration = forward_durations[data.fwd_segment_position];
-
-        BOOST_ASSERT(data.fwd_segment_position <
-                     std::distance(forward_durations.begin(), forward_durations.end()));
+        EdgeDistance forward_distance = util::coordinate_calculation::haversineDistance(
+            datafacade.GetCoordinateOfNode(forward_geometry(data.fwd_segment_position)),
+            datafacade.GetCoordinateOfNode(forward_geometry(data.fwd_segment_position + 1)));
 
         const auto reverse_weight_offset =
             std::accumulate(reverse_weights.begin(),
@@ -473,21 +501,38 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             reverse_durations.end() - data.fwd_segment_position - 1,
                             EdgeDuration{0});
 
+        EdgeDistance reverse_distance_offset = 0;
+        for (auto current = forward_geometry.begin() + 1;
+             current < forward_geometry.end() - data.fwd_segment_position - 1;
+             ++current)
+        {
+            reverse_distance_offset += util::coordinate_calculation::haversineDistance(
+                datafacade.GetCoordinateOfNode(*std::prev(current)),
+                datafacade.GetCoordinateOfNode(*current));
+        }
+
         EdgeWeight reverse_weight =
             reverse_weights[reverse_weights.size() - data.fwd_segment_position - 1];
         EdgeDuration reverse_duration =
             reverse_durations[reverse_durations.size() - data.fwd_segment_position - 1];
+        EdgeDistance reverse_distance = util::coordinate_calculation::haversineDistance(
+            datafacade.GetCoordinateOfNode(
+                forward_geometry(reverse_durations.size() - data.fwd_segment_position - 1)),
+            datafacade.GetCoordinateOfNode(
+                forward_geometry(reverse_durations.size() - data.fwd_segment_position)));
 
         ratio = std::min(1.0, std::max(0.0, ratio));
         if (data.forward_segment_id.id != SPECIAL_SEGMENTID)
         {
             forward_weight = static_cast<EdgeWeight>(forward_weight * ratio);
             forward_duration = static_cast<EdgeDuration>(forward_duration * ratio);
+            forward_distance = forward_distance * ratio;
         }
         if (data.reverse_segment_id.id != SPECIAL_SEGMENTID)
         {
             reverse_weight -= static_cast<EdgeWeight>(reverse_weight * ratio);
             reverse_duration -= static_cast<EdgeDuration>(reverse_duration * ratio);
+            reverse_distance -= reverse_distance * ratio;
         }
 
         // check phantom node segments validity
@@ -510,6 +555,10 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                         reverse_weight,
                         forward_weight_offset,
                         reverse_weight_offset,
+                        forward_distance,
+                        reverse_distance,
+                        forward_distance_offset,
+                        reverse_distance_offset,
                         forward_duration,
                         reverse_duration,
                         forward_duration_offset,

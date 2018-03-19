@@ -181,6 +181,7 @@ void annotatePath(const FacadeT &facade,
         BOOST_ASSERT(datasource_vector.size() > 0);
         BOOST_ASSERT(weight_vector.size() + 1 == id_vector.size());
         BOOST_ASSERT(duration_vector.size() + 1 == id_vector.size());
+
         const bool is_first_segment = unpacked_path.empty();
 
         const std::size_t start_index =
@@ -403,6 +404,51 @@ InternalRouteResult extractRoute(const DataFacade<AlgorithmT> &facade,
                  raw_route_data.unpacked_path_segments.front());
 
     return raw_route_data;
+}
+
+template <typename FacadeT>
+EdgeDuration computeEdgeDuration(const FacadeT &facade, NodeID node_id, NodeID turn_id)
+{
+    const auto geometry_index = facade.GetGeometryIndex(node_id);
+
+    // datastructures to hold extracted data from geometry
+    EdgeDuration total_duration;
+
+    if (geometry_index.forward)
+    {
+        auto duration_range = facade.GetUncompressedForwardDurations(geometry_index.id);
+        total_duration = std::accumulate(duration_range.begin(), duration_range.end(), 0);
+    }
+    else
+    {
+        auto duration_range = facade.GetUncompressedReverseDurations(geometry_index.id);
+        total_duration = std::accumulate(duration_range.begin(), duration_range.end(), 0);
+    }
+
+    const auto turn_duration = facade.GetDurationPenaltyForEdgeID(turn_id);
+    total_duration += turn_duration;
+
+    return total_duration;
+}
+
+template <typename FacadeT> EdgeDistance computeEdgeDistance(const FacadeT &facade, NodeID node_id)
+{
+    const auto geometry_index = facade.GetGeometryIndex(node_id);
+
+    EdgeDistance total_distance = 0.0;
+
+    auto geometry_range = facade.GetUncompressedForwardGeometry(geometry_index.id);
+    for (auto current = std::next(geometry_range.begin()); current != geometry_range.end();
+         ++current)
+    {
+        const auto coordinate_1 = facade.GetCoordinateOfNode(*std::prev(current));
+        const auto coordinate_2 = facade.GetCoordinateOfNode(*current);
+
+        total_distance +=
+            util::coordinate_calculation::haversineDistance(coordinate_1, coordinate_2);
+    }
+
+    return total_distance;
 }
 
 } // namespace routing_algorithms
