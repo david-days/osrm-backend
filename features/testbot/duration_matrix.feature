@@ -57,43 +57,60 @@ Feature: Basic Duration Matrix
             """
 
         And the ways
-            | nodes | highway  | toll | #                                        |
-            | ab    | motorway |      | not drivable for exclude=motorway        |
-            | cd    | primary  |      | always drivable                          |
-            | ac    | primary  | yes  | not drivable for exclude=toll and exclude=motorway,toll |
-            | bd    | motorway | yes  | not drivable for exclude=toll and exclude=motorway,toll |
+            | nodes | highway     | #                                 |
+            | ab    | motorway    | not drivable for exclude=motorway |
+            | cd    | residential |                                   |
+            | ac    | residential |                                   |
+            | bd    | residential |                                   |
 
         When I request a travel time matrix I should get
-            |   | a  | b  | c  | d  |
-            | a | 0  |    | 10 | 20 |
-            | b |    | 0  |    |    |
-            | c | 10 |    | 0  | 10 |
-            | d | 20 |    | 10 | 0  |
+            |   | a | b  | c  | d  |
+            | a | 0 | 45 | 15 | 30 |
 
 
-    Scenario: Testbot - Travel time matrix of minimal network with toll and motorway excludes
+       Scenario: Testbot - Travel time matrix of minimal network disconnected motorway exclude
+        Given the query options
+            | exclude  | motorway  |
+        And the extract extra arguments "--small-component-size 4"
+
+        Given the node map
+            """
+            ab                  efgh
+            cd
+            """
+
+        And the ways
+            | nodes | highway     | #                                 |
+            | be    | motorway    | not drivable for exclude=motorway |
+            | abcd  | residential |                                   |
+            | efgh  | residential |                                   |
+
+        When I request a travel time matrix I should get
+            |   | a | b   | e |
+            | a | 0 | 7.5 |   |
+
+
+    Scenario: Testbot - Travel time matrix of minimal network with motorway and toll excludes
         Given the query options
             | exclude  | motorway,toll  |
 
         Given the node map
             """
-            a b
-            c d
+            a b          e f
+            c d          g h
             """
 
         And the ways
-            | nodes | highway  | toll | #                                        |
-            | ab    | motorway |      | not drivable for exclude=motorway        |
-            | cd    | primary  |      | always drivable                          |
-            | ac    | primary  | yes  | not drivable for exclude=toll and exclude=motorway,toll |
-            | bd    | motorway | yes  | not drivable for exclude=toll and exclude=motorway,toll |
+            | nodes | highway     | toll | #                                 |
+            | be    | motorway    |      | not drivable for exclude=motorway |
+            | dg    | primary     | yes  | not drivable for exclude=toll     |
+            | abcd  | residential |      |                                   |
+            | efgh  | residential |      |                                   |
 
         When I request a travel time matrix I should get
-            |   | a  | b  | c  | d  |
-            | a | 0  |    |    |    |
-            | b |    | 0  |    |    |
-            | c |    |    | 0  | 10 |
-            | d |    |    | 10 |  0 |
+            |   | a | b  | e | g |
+            | a | 0 | 15 |   |   |
+
 
 
     Scenario: Testbot - Travel time matrix with different way speeds
