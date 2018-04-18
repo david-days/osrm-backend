@@ -21,7 +21,7 @@ Feature: Basic Duration Matrix
             | a | 0  | 10 |
             | b | 10 | 0  |
 
-
+    @ch
     Scenario: Testbot - Travel time matrix of minimal network with toll exclude
         Given the query options
             | exclude  | toll        |
@@ -46,6 +46,7 @@ Feature: Basic Duration Matrix
             | c |    |    | 0  | 10 |
             | d |    |    | 10 | 0  |
 
+    @ch
     Scenario: Testbot - Travel time matrix of minimal network with motorway exclude
         Given the query options
             | exclude  | motorway  |
@@ -67,11 +68,10 @@ Feature: Basic Duration Matrix
             |   | a | b  | c  | d  |
             | a | 0 | 45 | 15 | 30 |
 
-
-       Scenario: Testbot - Travel time matrix of minimal network disconnected motorway exclude
+    @ch
+    Scenario: Testbot - Travel time matrix of minimal network disconnected motorway exclude
         Given the query options
             | exclude  | motorway  |
-        And the extract extra arguments "--small-component-size 4"
 
         Given the node map
             """
@@ -89,7 +89,7 @@ Feature: Basic Duration Matrix
             |   | a | b   | e |
             | a | 0 | 7.5 |   |
 
-
+    @ch
     Scenario: Testbot - Travel time matrix of minimal network with motorway and toll excludes
         Given the query options
             | exclude  | motorway,toll  |
