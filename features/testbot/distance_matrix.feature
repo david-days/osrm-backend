@@ -1,4 +1,4 @@
-@matrix @testbot
+@matrix @testbot @ch
 Feature: Basic Distance Matrix
 # note that results of travel distance are in metres
 
