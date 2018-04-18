@@ -164,23 +164,6 @@ void retrievePackedPathFromSearchSpace(NodeID middle_node_id,
                                        const std::vector<NodeBucket> &search_space_with_buckets,
                                        std::vector<NodeID> &packed_leg)
 {
-
-    //     [  0           1          2         3    ]
-    //     [ [m0,p=m3],[m1,p=m2],[m2,p=m1], [m3,p=2]]
-
-    //           targets (columns) target_id = column_idx
-    //              a   b   c
-    //          a  [0,  1,  2],
-    // sources  b  [3,  4,  5],
-    //  (rows)  c  [6,  7,  8],
-    //          d  [9, 10, 11]
-    // row_idx * number_of_targets + column_idx
-    // a -> c 0 * 3 + 2 = 2
-    // c -> c 2 * 3 + 2 = 8
-    // d -> c 3 * 3 + 2 = 11
-
-    //   middle_nodes_table = [0 , 1, 2, .........]
-
     auto bucket_list = std::equal_range(search_space_with_buckets.begin(),
                                         search_space_with_buckets.end(),
                                         middle_node_id,

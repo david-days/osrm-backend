@@ -461,14 +461,17 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             EdgeDuration{0});
 
         EdgeDistance forward_distance_offset = 0;
-        for (auto current = std::next(forward_geometry.begin());
-             current < forward_geometry.begin() + data.fwd_segment_position + 1;
+        for (auto current = forward_geometry.begin();
+             current < forward_geometry.begin() + data.fwd_segment_position;
              ++current)
         {
             forward_distance_offset += util::coordinate_calculation::haversineDistance(
-                datafacade.GetCoordinateOfNode(*std::prev(current)),
-                datafacade.GetCoordinateOfNode(*current));
+                datafacade.GetCoordinateOfNode(*current),
+                datafacade.GetCoordinateOfNode(*std::next(current)));
         }
+
+        BOOST_ASSERT(data.fwd_segment_position <
+                     std::distance(forward_durations.begin(), forward_durations.end()));
 
         EdgeWeight forward_weight = forward_weights[data.fwd_segment_position];
         EdgeDuration forward_duration = forward_durations[data.fwd_segment_position];

@@ -251,42 +251,6 @@ Status TripPlugin::HandleRequest(const RoutingAlgorithmsInterface &algorithms,
         duration_trip = trip::FarthestInsertionTrip(number_of_locations, result_duration_table);
     }
 
-    // // compute the distance table of all phantom nodes
-    // auto result_distance_table = util::DistTableWrapper<EdgeDistance>(
-    //     algorithms.ManyToManySearch(snapped_phantoms, {}, {}, /*requestDistance*/ false).second,
-    //     number_of_locations);
-
-    // if (result_distance_table.size() == 0)
-    // {
-    //     return Status::Error;
-    // }
-
-    // BOOST_ASSERT_MSG(result_distance_table.size() == number_of_locations * number_of_locations,
-    //                  "Distance Table has wrong size");
-
-    // if (!IsStronglyConnectedComponent(result_distance_table))
-    // {
-    //     return Error("NoTrips", "No trip visiting all destinations possible.",
-    //     *json_result.find("distances"));
-    // }
-
-    // if (fixed_start && fixed_end)
-    // {
-    //     ManipulateTableForFSE(source_id, destination_id, result_distance_table);
-    // }
-
-    // std::vector<NodeID> distance_trip;
-    // distance_trip.reserve(number_of_locations);
-    // // get an optimized order in which the destinations should be visited
-    // if (number_of_locations < BF_MAX_FEASABLE)
-    // {
-    //     distance_trip = trip::BruteForceTrip(number_of_locations, result_distance_table);
-    // }
-    // else
-    // {
-    //     distance_trip = trip::FarthestInsertionTrip(number_of_locations, result_distance_table);
-    // }
-
     // rotate result such that roundtrip starts at node with index 0
     // thist first if covers scenarios: !fixed_end || fixed_start || (fixed_start && fixed_end)
     if (!fixed_end || fixed_start)

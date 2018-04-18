@@ -82,11 +82,7 @@ Status TablePlugin::HandleRequest(const RoutingAlgorithmsInterface &algorithms,
 
     auto snapped_phantoms = SnapPhantomNodes(phantom_nodes);
 
-    bool requestDistance = false;
-    if (params.annotations & api::TableParameters::AnnotationsType::Distance)
-    {
-        requestDistance = true;
-    }
+    bool requestDistance = params.annotations & api::TableParameters::AnnotationsType::Distance;
 
     auto result_tables_pair = algorithms.ManyToManySearch(
         snapped_phantoms, params.sources, params.destinations, requestDistance);

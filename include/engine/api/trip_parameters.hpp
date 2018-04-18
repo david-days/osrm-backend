@@ -59,13 +59,6 @@ struct TripParameters : public RouteParameters
         Any,
         Last
     };
-    enum class AnnotationsType
-    {
-        None = 0,
-        Duration = 0x01,
-        Distance = 0x02,
-        All = Duration | Distance
-    };
 
     template <typename... Args>
     TripParameters(SourceType source_,
