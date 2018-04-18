@@ -85,10 +85,9 @@ struct PhantomNode
 
     EdgeDistance GetForwardDistance() const
     {
-        // forward_distance
-        //   | offset
-        //  _|_  |
-        // /   \/ \
+        // .....                  <-- forward_distance
+        //      ....              <-- offset
+        // .........              <-- desired distance
         //         x              <-- this is PhantomNode.location
         // 0----1----2----3----4  <-- EdgeBasedGraph Node segments
         BOOST_ASSERT(forward_segment_id.enabled);
@@ -97,10 +96,9 @@ struct PhantomNode
 
     EdgeDistance GetReverseDistance() const
     {
-        //           reverse_distance
-        //       offset   |
-        //          |  ___|___
-        //         / \/       \
+        //            ..........  <-- reverse_distance
+        //         ...            <-- offset
+        //         .............  <-- desired distance
         //         x              <-- this is PhantomNode.location
         // 0----1----2----3----4  <-- EdgeBasedGraph Node segments
         BOOST_ASSERT(reverse_segment_id.enabled);
