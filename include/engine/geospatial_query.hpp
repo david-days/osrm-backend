@@ -28,21 +28,6 @@ inline std::pair<bool, bool> boolPairAnd(const std::pair<bool, bool> &A,
     return std::make_pair(A.first && B.first, A.second && B.second);
 }
 
-// template<class ForwardIt, class T, typename DataFacadeT>
-// T accumulateDistance(ForwardIt first, ForwardIt last, T init, DataFacadeT datafacade)
-// {
-//     if (first != last) {
-//         for (auto current = std::next(first); current != last; ++current)
-//         {
-//             init += util::coordinate_calculation::haversineDistance(
-//                 datafacade.GetCoordinateOfNode(*std::prev(current)),
-//                 datafacade.GetCoordinateOfNode(*current));
-//         }
-//     }
-
-//     return init;
-// }
-
 // Implements complex queries on top of an RTree and builds PhantomNodes from it.
 //
 // Only holds a weak reference on the RTree and coordinates!
@@ -476,7 +461,7 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             EdgeDuration{0});
 
         EdgeDistance forward_distance_offset = 0;
-        for (auto current = forward_geometry.begin() + 1;
+        for (auto current = std::next(forward_geometry.begin());
              current < forward_geometry.begin() + data.fwd_segment_position + 1;
              ++current)
         {
@@ -502,7 +487,7 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             EdgeDuration{0});
 
         EdgeDistance reverse_distance_offset = 0;
-        for (auto current = forward_geometry.begin() + 1;
+        for (auto current = std::next(forward_geometry.begin());
              current < forward_geometry.end() - data.fwd_segment_position - 1;
              ++current)
         {

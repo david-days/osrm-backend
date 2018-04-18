@@ -406,31 +406,6 @@ InternalRouteResult extractRoute(const DataFacade<AlgorithmT> &facade,
     return raw_route_data;
 }
 
-template <typename FacadeT>
-EdgeDuration computeEdgeDuration(const FacadeT &facade, NodeID node_id, NodeID turn_id)
-{
-    const auto geometry_index = facade.GetGeometryIndex(node_id);
-
-    // datastructures to hold extracted data from geometry
-    EdgeDuration total_duration;
-
-    if (geometry_index.forward)
-    {
-        auto duration_range = facade.GetUncompressedForwardDurations(geometry_index.id);
-        total_duration = std::accumulate(duration_range.begin(), duration_range.end(), 0);
-    }
-    else
-    {
-        auto duration_range = facade.GetUncompressedReverseDurations(geometry_index.id);
-        total_duration = std::accumulate(duration_range.begin(), duration_range.end(), 0);
-    }
-
-    const auto turn_duration = facade.GetDurationPenaltyForEdgeID(turn_id);
-    total_duration += turn_duration;
-
-    return total_duration;
-}
-
 template <typename FacadeT> EdgeDistance computeEdgeDistance(const FacadeT &facade, NodeID node_id)
 {
     const auto geometry_index = facade.GetGeometryIndex(node_id);
@@ -441,11 +416,8 @@ template <typename FacadeT> EdgeDistance computeEdgeDistance(const FacadeT &faca
     for (auto current = std::next(geometry_range.begin()); current != geometry_range.end();
          ++current)
     {
-        const auto coordinate_1 = facade.GetCoordinateOfNode(*std::prev(current));
-        const auto coordinate_2 = facade.GetCoordinateOfNode(*current);
-
-        total_distance +=
-            util::coordinate_calculation::haversineDistance(coordinate_1, coordinate_2);
+        total_distance += util::coordinate_calculation::haversineDistance(
+            facade.GetCoordinateOfNode(*std::prev(current)), facade.GetCoordinateOfNode(*current));
     }
 
     return total_distance;
