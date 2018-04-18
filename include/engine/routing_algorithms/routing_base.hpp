@@ -413,11 +413,10 @@ template <typename FacadeT> EdgeDistance computeEdgeDistance(const FacadeT &faca
     EdgeDistance total_distance = 0.0;
 
     auto geometry_range = facade.GetUncompressedForwardGeometry(geometry_index.id);
-    for (auto current = std::next(geometry_range.begin()); current != geometry_range.end();
-         ++current)
+    for (auto current = geometry_range.begin(); current < geometry_range.end() - 1; ++current)
     {
         total_distance += util::coordinate_calculation::haversineDistance(
-            facade.GetCoordinateOfNode(*std::prev(current)), facade.GetCoordinateOfNode(*current));
+            facade.GetCoordinateOfNode(*current), facade.GetCoordinateOfNode(*std::next(current)));
     }
 
     return total_distance;

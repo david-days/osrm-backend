@@ -490,13 +490,13 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
                             EdgeDuration{0});
 
         EdgeDistance reverse_distance_offset = 0;
-        for (auto current = std::next(forward_geometry.begin());
-             current < forward_geometry.end() - data.fwd_segment_position - 1;
+        for (auto current = forward_geometry.begin();
+             current < forward_geometry.end() - data.fwd_segment_position - 2;
              ++current)
         {
             reverse_distance_offset += util::coordinate_calculation::haversineDistance(
-                datafacade.GetCoordinateOfNode(*std::prev(current)),
-                datafacade.GetCoordinateOfNode(*current));
+                datafacade.GetCoordinateOfNode(*current),
+                datafacade.GetCoordinateOfNode(*std::next(current)));
         }
 
         EdgeWeight reverse_weight =

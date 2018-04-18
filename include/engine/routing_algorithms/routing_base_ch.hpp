@@ -301,7 +301,7 @@ EdgeDistance calculateEBGNodeAnnotations(const DataFacade<Algorithm> &facade,
     std::stack<std::tuple<NodeID, NodeID, bool>> recursion_stack;
     std::stack<EdgeDistance> distance_stack;
     // We have to push the path in reverse order onto the stack because it's LIFO.
-    for (auto current = std::prev(packed_path_end); current != packed_path_begin;
+    for (auto current = std::prev(packed_path_end); current > packed_path_begin;
          current = std::prev(current))
     {
         recursion_stack.emplace(*std::prev(current), *current, false);
