@@ -1,3 +1,8 @@
+# UNRELEASED
+ - Features:
+    - ADDED: `table` plugin now optionally returns `distance` matrix as part of response [#4990](https://github.com/Project-OSRM/osrm-backend/pull/4990)
+    - ADDED: New optional parameter `annotations` for `table` that accepts `distance`, `duration`, or both `distance,duration` as values [#4990](https://github.com/Project-OSRM/osrm-backend/pull/4990)
+
 # 5.17.0
   - Changes from 5.16.0:
     - Bugfixes:
